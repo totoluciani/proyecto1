@@ -17,24 +17,8 @@ rows = [
     {'name': 'Carol','nationality': 'American'},
 ]
 
-#Definir funcion 'tabla' para poder llamarla luego desde 'alll_pages.py' 
+#Definir funcion 'tabla' para poder llamarla luego desde 'all_pages.py' 
 def tabla():
-    with theme.frame('Tablas'):
-        ui.page_title('Tablas')
-    #Darle un nombre a la variable para despues poder agregarke un menu para filtrar 
-    tablax = ui.table(columns=columns, rows=rows, row_key='name')
-    #Menu para filtrar
-    def toggle(column: Dict, visible: bool) -> None:
-        column['classes'] = '' if visible else 'hidden'
-        column['headerClasses'] = '' if visible else 'hidden'
-        tablax.update()
-
-    with ui.button(icon='menu'):
-        with ui.menu(), ui.column().classes('gap-0 p-2'):
-            for column in columns:
-                ui.switch(column['label'], value=True, on_change=lambda e,
-                        column=column: toggle(column, e.value))
-    
     #Definir funcion para poder pasarlo a csv e importarlo
     def download_csv():
         # Crear el DataFrame a partir de 'rows' ya que 'rows' incluye la informacion de la tabla y 'colums' la descripcion de la tabla
@@ -51,3 +35,38 @@ def tabla():
 
     # Llamar a la función download_csv al hacer clic en el botón
     ui.button("Importar", on_click=download_csv)
+
+    with theme.frame('Tablas'):
+        ui.page_title('Tablas')
+    #Darle un nombre a la variable para despues poder agregarle un menu para filtrar (esta variable permite mostrar la tabla con sus valores asignados)
+    tablax = ui.table(columns=columns, rows=rows, row_key='name')
+    #Menu para filtrar
+    def toggle(column: Dict, visible: bool) -> None:
+        column['classes'] = '' if visible else 'hidden'
+        column['headerClasses'] = '' if visible else 'hidden'
+        tablax.update()
+
+    with ui.button(icon='menu'):
+        with ui.menu(), ui.column().classes('gap-0 p-2'):
+            for column in columns:
+                ui.switch(column['label'], value=True, on_change=lambda e,
+                        column=column: toggle(column, e.value))
+    
+
+    #Se define nueva funcion para poder agregar 'name'
+    def add_task():
+        #task_name mediante .value.strip() consigue el valor de task_item... no se puede poner task_item directamente ya que representa un campo de entrada y no el valor en si mismo como sucede normalmente
+        task_name = task_item.value.strip()
+        #se compara a la nueva variable con False/0/""
+        if not task_name:
+            ui.notify('NO PUEDE ESTAR VACIO')
+        #se compara a la nueva variable con True/1/"valor real"
+        else:
+            tablax.add_rows({'name': task_name})
+            task_item.value = ""
+            
+
+
+    task_item = ui.input("Ingrese un nombre")
+    ui.button("agregar",on_click=add_task)
+    
